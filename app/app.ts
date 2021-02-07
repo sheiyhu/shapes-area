@@ -2,6 +2,8 @@ import dotenv from 'dotenv';
 import express, {Application, Request, Response, NextFunction} from 'express';
 import mongoose from 'mongoose';
 
+import appError from './../utils/appError';
+import {globalErrorHandler} from './../controllers/errorController';
 
 dotenv.config({ path: './config.env' });
 
@@ -21,6 +23,13 @@ mongoose.connect(process.env.DB_URI, {
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+//API endpoint
+app.all('*', (req: Request, res: Response, next: NextFunction) => {
+    next( new appError(`Can't find ${req.originalUrl} on the server`, 404))
+});
+
+//Error handling
+app.use(globalErrorHandler)
 
 //Express server configuration
 const port = process.env.PORT || 3000;
