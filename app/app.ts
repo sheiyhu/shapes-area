@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 
 import appError from './../utils/appError';
 import {globalErrorHandler} from './../controllers/errorController';
+import userRoute from './../routes/userRoutes';
 
 dotenv.config({ path: './config.env' });
 
@@ -24,6 +25,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 //API endpoint
+app.use('/api/users', userRoute);
 app.all('*', (req: Request, res: Response, next: NextFunction) => {
     next( new appError(`Can't find ${req.originalUrl} on the server`, 404))
 });
