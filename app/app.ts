@@ -51,6 +51,18 @@ app.use(xss());
 app.use(hpp());
 
 //API endpoint
+app.get('/', (req, res) => {
+    res.status(200).json({ 
+        "App": "Area of shapes",
+        "message" : "Wellcome",
+        "available routes" : {
+            "signup": "/api/users/signup",
+            "login": "/api/users/login",
+            "calculate area": "/api/shapes/calculate",
+            "get previous calculations": "/api/shapes/get-previous-calculations"
+        }
+    })
+});
 app.use('/api/users', userRoute);
 app.use('/api/shapes', shapeRoute);
 app.all('*', (req: Request, res: Response, next: NextFunction) => {
