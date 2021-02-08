@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response} from 'express';
+import { NextFunction, query, Request, Response} from 'express';
 import {Triangle, Circle, Square, Rectangle, Shape} from './../models/shapeModel';
 import {catchAsync} from './../utils/catchAsync';
 import appError from './../utils/appError';
@@ -84,19 +84,19 @@ export const calculateArea = catchAsync( async (req: any, res: Response, next: N
         //checking for the type of shape and calculating the area
         if (shape == "circle"){
             calcAreaOfCircle(dimensions.radius)
-            response.answer = result.calculate()
+            response.answer = result
             area = new Circle(response)
         } else if (shape == "square") {
             calcAreaOfSquare(dimensions.side)
-            response.answer = result.calculate()
+            response.answer = result
             area = new Square(response)
         } else if (shape == "rectangle") {
             calcAreaOfRectangle(dimensions.length, dimensions.breadth)
-            response.answer = result.calculate()
+            response.answer = result
             area = new Rectangle(response)
         } else if (shape == "triangle") {
             calcAreaOfTriangle(dimensions.length_a, dimensions.length_b, dimensions.length_c)
-            response.answer = result.calculate()
+            response.answer = result
             area = new Triangle(response)
         } else{
             return next(new appError("Invalid shape. The acceptable shapes are Circle, Rectangle, Triangle and Square", 404))
@@ -115,7 +115,22 @@ export const calculateArea = catchAsync( async (req: any, res: Response, next: N
 
 //to get the previous calculations
 export const getPreviousCalculations =  catchAsync( async (req: any, res: Response, next: NextFunction) => {
-    const previousCalculations = await Shape.find({}).where({user: req.id}).select('-_id -type -__v -user -createdAt -updatedAt')
+    
+    let query = Shape.find({}).where({user: req.id}).select('-_id -type -__v -user -createdAt -updatedAt');
+
+    
+
+    if(Object.entries(req.query).length !== 0) {
+        let page = req.query.page * 1 || 1;
+    let limit = req.query.limit * 1 || 1;
+    let skip = (page - 1) * limit;
+    query = query.skip(skip).limit(limit);
+    } 
+
+
+    
+
+    const previousCalculations = await query
 
     res.status(200).send({
         status:"Success",

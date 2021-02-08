@@ -1,6 +1,11 @@
 import dotenv from 'dotenv';
 import express, {Application, Request, Response, NextFunction} from 'express';
 import mongoose from 'mongoose';
+import rateLimit from 'express-rate-limit';
+import helmet from 'helmet';
+import mongoSanitize from 'express-mongo-sanitize';
+import xss from 'xss-clean';
+import hpp from 'hpp';
 
 import appError from './../utils/appError';
 import {globalErrorHandler} from './../controllers/errorController';
@@ -21,9 +26,29 @@ mongoose.connect(process.env.DB_URI, {
     console.log('DB connected successfully');
 })
 
+// Set security HTTP headers
+app.use(helmet());
+
+// Limit requests from same API
+const limiter = rateLimit({
+    max: 100,
+    windowMs: 60 * 60 * 1000,
+    message: 'Too many requests from this IP, please try again in an hour!'
+  });
+  app.use('/api', limiter);
+
 //Express middleware
-app.use(express.json());
+app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: false }));
+
+// Data sanitization against NoSQL query injection
+app.use(mongoSanitize());
+
+// Data sanitization against XSS
+app.use(xss());
+
+// Prevent parameter pollution
+app.use(hpp());
 
 //API endpoint
 app.use('/api/users', userRoute);

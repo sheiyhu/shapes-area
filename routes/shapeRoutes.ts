@@ -5,6 +5,6 @@ import {protect} from './../controllers/authController'
 const router = express.Router();
 
 router.post('/calculate', protect, calculateArea)
-router.get('/get-previous-calculation', protect, getPreviousCalculations)
+router.get('/get-previous-calculations', protect, getPreviousCalculations)
 
 export default  router;
